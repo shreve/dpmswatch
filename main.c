@@ -21,6 +21,13 @@ void usage() {
   exit(1);
 }
 
+void runCommand(char *command) {
+  int result = system(command);
+  if (result != 0) {
+    printf("Command `%s` exited with non-zero status: %i", command, result);
+  }
+}
+
 // Fetch and validate the arguments supplied
 void initArgs(int argc, char *argv[], char *on, char *off) {
   // You need to have at least one argument (other than progname)
@@ -53,6 +60,7 @@ int main(int argc, char *argv[]) {
   CARD16 state;
   Bool onoff;
   Bool last;
+  Bool firstLoop = true;
 
   for(;;) {
     // Fetch information for the current string
@@ -64,15 +72,16 @@ int main(int argc, char *argv[]) {
 
     // If the last value isn't undefined and isn't this value, a change has
     // happened, and we should trigger the corresponding function.
-    if (!(last != true && last != false) && last != onoff) {
+    if (!firstLoop && last != onoff) {
       if (onoff) {
-        system(onCmd);
+        runCommand(onCmd);
       } else {
-        system(offCmd);
+        runCommand(offCmd);
       }
     }
 
     last = onoff;
+    firstLoop = false;
 
     sleep(1);
   }
